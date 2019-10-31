@@ -5,83 +5,31 @@ using System.Windows.Forms;
 
 namespace Renderer
 {
-    /// <summary>
-    /// Основной класс программы.
-    /// </summary>
     public sealed class Core
     {
-        /// <summary>
-        /// Экземпляр основного класса.
-        /// </summary>
         private static Core _core;
-
-        /// <summary>
-        /// Окно программы.
-        /// </summary>
         private Form _wnd;
-
-        /// <summary>
-        /// Буфер вершин для хранения модели.
-        /// </summary>
         private VertexBuffer _vb;
-
-        /// <summary>
-        /// Фабрика загрузчиков 3D моделей.
-        /// </summary>
         private LoadersFactory _loaders;
-
-        /// <summary>
-        /// Предыдущие координаты мыши.
-        /// </summary>
         private int _prevX, _prevY;
-
-        /// <summary>
-        /// Нажата ли кнопка мыши.
-        /// </summary>
         private bool _mouseDown;
-
-        /// <summary>
-        /// Контейнер для основных панелей (панель с кнопками и панель для отрисовки изображений).
-        /// </summary>
         private SplitContainer _splitContainer;
-
-        /// <summary>
-        /// Масштаб.
-        /// </summary>
         private int _zoom = 10;
+        private bool _e, _q, _a, _d, _s, _w; 
 
-        /// <summary>
-        /// Матрица вращения модели.
-        /// </summary>
         private Matrix _rotationMatrix =
             Matrix.CreateIdentity() *
             Matrix.CreateRotateX(30) *
             Matrix.CreateRotateY(30);
 
-        /// <summary>
-        /// Экземпляр основного класса.
-        /// </summary>
-        public static Core Instance
-        {
-            get { return _core ?? (_core = new Core()); }
-        }
+        public static Core Instance => _core ?? (_core = new Core());
 
-        /// <summary>
-        /// Кнопки клавиатуры.
-        /// </summary>
-        private bool _e, _q, _a, _d, _s, _w; 
-
-        /// <summary>
-        /// Окно.
-        /// </summary>
         public Form Window
         {
             get
             {
-                // Если окно ещё не создано...
                 if (_wnd == null)
                 {
-                    // Создаём окно.
                     _wnd = new Form
                     {
                         Width = 1024,
@@ -92,21 +40,24 @@ namespace Renderer
                     _wnd.KeyDown += (sender, e) => KeyDown(e.KeyCode);
                     _wnd.KeyUp += (sender, e) => KeyUp(e.KeyCode);
 
-                    // Основной контейнер.
-                    _splitContainer = new SplitContainer();
-                    _splitContainer.Panel1MinSize = 150;
-                    _splitContainer.SplitterIncrement = 10;
-                    _splitContainer.FixedPanel = FixedPanel.Panel1;
-                    _splitContainer.Dock = DockStyle.Fill;
-                    _splitContainer.TabStop = false;
+                    _splitContainer = new SplitContainer
+                    {
+                        Panel1MinSize = 150,
+                        SplitterIncrement = 10,
+                        FixedPanel = FixedPanel.Panel1,
+                        Dock = DockStyle.Fill,
+                        TabStop = false
+                    };
+
                     _wnd.Controls.Add(_splitContainer);
+
                     _wnd.Shown += (sender, e) =>
                     {
                         _splitContainer.SplitterDistance = 150;
                     };
+
                     RenderPanel.Cursor = Cursors.SizeAll;
 
-                    // Контейнер для кнопок.
                     var menuSplitContainer = new SplitContainer();
                     menuSplitContainer.Orientation = Orientation.Horizontal;
                     menuSplitContainer.Dock = DockStyle.Fill;
@@ -117,23 +68,30 @@ namespace Renderer
                     menuSplitContainer.TabStop = false;
                     MenuPanel.Controls.Add(menuSplitContainer);
 
-                    // Кнопки масштабирования.
+                    var btnZoomIn = new Button
+                    {
+                        Image = new Bitmap(Path.Combine(
+                            Path.GetDirectoryName(Application.ExecutablePath) ?? string.Empty, "Graphics",
+                            "zoomIn.jpg")),
+                        AutoSize = true,
+                        BackColor = Color.White,
+                        TabStop = false
+                    };
 
-                    var btnZoomIn = new Button();
-                    btnZoomIn.Image = new Bitmap(Path.Combine(Path.GetDirectoryName(Application.ExecutablePath) ?? string.Empty, "Graphics", "zoomIn.jpg"));
-                    btnZoomIn.AutoSize = true;
-                    btnZoomIn.BackColor = Color.White;
-                    btnZoomIn.TabStop = false;
                     btnZoomIn.KeyDown += (sender, e) => KeyDown(e.KeyCode);
                     btnZoomIn.KeyUp += (sender, e) => KeyUp(e.KeyCode);
                     menuSplitContainer.Panel1.Controls.Add(btnZoomIn);
 
-                    var btnZoomOut = new Button();
-                    btnZoomOut.Image = new Bitmap(Path.Combine(Path.GetDirectoryName(Application.ExecutablePath) ?? string.Empty, "Graphics", "zoomOut.jpg"));
-                    btnZoomOut.AutoSize = true;
-                    btnZoomOut.BackColor = Color.White;
-                    btnZoomOut.Left = btnZoomIn.Left + btnZoomIn.Width;
-                    btnZoomOut.TabStop = false;
+                    var btnZoomOut = new Button
+                    {
+                        Image = new Bitmap(Path.Combine(
+                            Path.GetDirectoryName(Application.ExecutablePath) ?? string.Empty, "Graphics",
+                            "zoomOut.jpg")),
+                        AutoSize = true,
+                        BackColor = Color.White,
+                        Left = btnZoomIn.Left + btnZoomIn.Width,
+                        TabStop = false
+                    };
                     btnZoomOut.KeyDown += (sender, e) => KeyDown(e.KeyCode);
                     btnZoomOut.KeyUp += (sender, e) => KeyUp(e.KeyCode);
                     menuSplitContainer.Panel1.Controls.Add(btnZoomOut);
@@ -145,25 +103,27 @@ namespace Renderer
 
                     MenuPanel.Controls.Add(menuSplitContainer);
 
-                    // Размер иконок моделей.
                     const int imgSize = 100;
 
-                    // Массив иконок моделей.
-                    var imageList = new ImageList();
-                    imageList.ImageSize = new Size(imgSize, imgSize);
+                    var imageList = new ImageList
+                    {
+                        ImageSize = new Size(imgSize, imgSize)
+                    };
 
-                    // Список иконок моделей.
-                    var listView = new ListView();
-                    listView.Dock = DockStyle.Fill;
-                    listView.LargeImageList = imageList;
-                    listView.MultiSelect = false;
+                    var listView = new ListView
+                    {
+                        Dock = DockStyle.Fill,
+                        LargeImageList = imageList,
+                        MultiSelect = false
+                    };
 
-                    // Загружаем все модели и рисуем иконки.
                     int i = 0;
                     var files = Directory.GetFiles(Path.Combine(Path.GetDirectoryName(Application.ExecutablePath) ?? string.Empty, "Objects"));
+
                     foreach (string fileName in files)
                     {
                         var tmp = new Bitmap(imgSize, imgSize);
+
                         using (var raw = new RawBitmap(tmp))
                         {
                             raw.Clear(Color.Azure);
@@ -192,8 +152,6 @@ namespace Renderer
 
                     menuSplitContainer.Panel2.Controls.Add(listView);
 
-                    // Обработчик изменения индекса выбранной модели в списке:
-                    // если выбрана новая модель, загружаем её.
                     listView.SelectedIndexChanged += (sender, e) =>
                     {
                         if (listView.SelectedIndices.Count > 0)
@@ -238,9 +196,11 @@ namespace Renderer
                     RenderPanel.Paint += (sender, e) => DrawScene();
                     RenderPanel.Resize += (sender, e) => DrawScene();
 
-                    // Таймер для трансформации объекта при управлении с клавиатуры.
-                    var timer = new Timer();
-                    timer.Interval = 20;
+                    var timer = new Timer
+                    {
+                        Interval = 20
+                    };
+
                     timer.Tick += (sender, e) =>
                     {
                         if ((_e && !_q) || (!_e && _q))
@@ -292,9 +252,6 @@ namespace Renderer
             }
         }
 
-        /// <summary>
-        /// Нажатие кнопки.
-        /// </summary>
         private void KeyDown(Keys key)
         {
             switch (key)
@@ -325,9 +282,6 @@ namespace Renderer
             }
         }
 
-        /// <summary>
-        /// Отпускание кнопки.
-        /// </summary>
         private void KeyUp(Keys key)
         {
             switch (key)
@@ -358,9 +312,6 @@ namespace Renderer
             }
         }
 
-        /// <summary>
-        /// Приближение.
-        /// </summary>
         private void ZoomIn(Button btnZoomOut, Button btnZoomIn, int step)
         {
             _zoom += step;
@@ -375,9 +326,6 @@ namespace Renderer
             DrawScene();
         }
 
-        /// <summary>
-        /// Отдаление.
-        /// </summary>
         private void ZoomOut(Button btnZoomOut, Button btnZoomIn, int step)
         {
             _zoom -= step;
@@ -392,29 +340,13 @@ namespace Renderer
             DrawScene();
         }
 
-        /// <summary>
-        /// Загружает модель.
-        /// </summary>
         public void LoadModel(string fileName)
         {
             _vb = Loaders.GetLoader(fileName).Load(fileName);
         }
 
-        /// <summary>
-        /// Панель для рендеринга.
-        /// </summary>
-        public Panel RenderPanel
-        {
-            get { return _splitContainer.Panel2; }
-        }
-
-        /// <summary>
-        /// Панель с кнопками.
-        /// </summary>
-        public Panel MenuPanel
-        {
-            get { return _splitContainer.Panel1; }
-        }
+        public Panel RenderPanel => _splitContainer.Panel2;
+        public Panel MenuPanel => _splitContainer.Panel1;
 
         public void DrawScene()
         {
@@ -429,8 +361,6 @@ namespace Renderer
                         Vector volume = _vb.Volume;
                         double scaleFactor = Math.Min(bmp.Width, bmp.Height) / 2.0 / Math.Max(volume.X, Math.Max(volume.Y, volume.Z)) * (_zoom / 10.0);
 
-                        // Рисуем объект.
-
                         Matrix matrix =
                             Matrix.CreateIdentity() *
                             Matrix.CreateScale(scaleFactor, scaleFactor, scaleFactor) *
@@ -440,8 +370,6 @@ namespace Renderer
                         VertexBuffer tmpVb = _vb.Clone().Mult(matrix);
                         tmpVb.CalcTrianglesNormals();
                         tmpVb.DrawTriangles(raw, Color.GhostWhite, true);
-
-                        // Рисуем тень объекта.
 
                         matrix =
                             Matrix.CreateIdentity() *
@@ -462,14 +390,7 @@ namespace Renderer
             }
         }
 
-        /// <summary>
-        /// Фабрика загрузчиков 3D моделей.
-        /// </summary>
-        public LoadersFactory Loaders
-        {
-            get { return _loaders ?? (_loaders = new LoadersFactory()); }
-        }
-
+        public LoadersFactory Loaders => _loaders ?? (_loaders = new LoadersFactory());
         private Core() { }
 
         public void Run()
@@ -479,7 +400,7 @@ namespace Renderer
         }
 
         [STAThread]
-        public static void Main(string[] args)
+        public static void Main()
         {
             Instance.Run();
         }

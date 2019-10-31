@@ -2,19 +2,9 @@
 
 namespace Renderer
 {
-    /// <summary>
-    /// Матрица.
-    /// </summary>
     public sealed class Matrix
     {
-        /// <summary>
-        /// Массив для хранения значений матрицы.
-        /// </summary>
         private readonly double[,] _arr;
-
-        /// <summary>
-        /// Размер матрицы.
-        /// </summary>
         private const int Size = 4;
 
         public Matrix()
@@ -22,22 +12,18 @@ namespace Renderer
             _arr = new double[Size, Size];
         }
 
-        /// <summary>
-        /// Создаёт единичную матрицу.
-        /// </summary>
         public static Matrix CreateIdentity()
         {
             var matrix = new Matrix();
 
             for (int i = 0; i < Size; ++i)
+            {
                 matrix._arr[i, i] = 1.0;
+            }
 
             return matrix;
         }
 
-        /// <summary>
-        /// Создаёт матрицу перемещения.
-        /// </summary>
         public static Matrix CreateTranslate(double x, double y, double z)
         {
             var matrix = CreateIdentity();
@@ -49,9 +35,6 @@ namespace Renderer
             return matrix;
         }
 
-        /// <summary>
-        /// Создаёт матрицу вращения по оси X.
-        /// </summary>
         public static Matrix CreateRotateX(double angle)
         {
             var matrix = CreateIdentity();
@@ -68,9 +51,6 @@ namespace Renderer
             return matrix;
         }
 
-        /// <summary>
-        /// Создаёт матрицу вращения по оси Y.
-        /// </summary>
         public static Matrix CreateRotateY(double angle)
         {
             var matrix = CreateIdentity();
@@ -87,9 +67,6 @@ namespace Renderer
             return matrix;
         }
 
-        /// <summary>
-        /// Создаёт матрицу вращения по оси Z.
-        /// </summary>
         public static Matrix CreateRotateZ(double angle)
         {
             var matrix = CreateIdentity();
@@ -106,9 +83,6 @@ namespace Renderer
             return matrix;
         }
 
-        /// <summary>
-        /// Создаёт матрицу масштабирования.
-        /// </summary>
         public static Matrix CreateScale(double x, double y, double z)
         {
             var matrix = CreateIdentity();
@@ -120,36 +94,33 @@ namespace Renderer
             return matrix;
         }
 
-        /// <summary>
-        /// Умножает матрицу на матрицу.
-        /// </summary>
         Matrix Mult(Matrix matrix)
         {
 	        var result = new Matrix();
 
-	        for (int j = 0; j < Size; ++j)
+            for (int j = 0; j < Size; ++j)
+            {
                 for (int i = 0; i < Size; ++i)
+                {
                     for (int k = 0; k < Size; ++k)
-				        result[i, j] += this[k, j] * matrix[i, k];
+                    {
+                        result[i, j] += this[k, j] * matrix[i, k];
+                    }
+                }
+            }
 
 	        return result;
         }
 
-        /// <summary>
-        /// Умножает матрицу на матрицу.
-        /// </summary>
         public static Matrix operator *(Matrix mx0, Matrix mx1)
         {
             return mx0.Mult(mx1);
         }
 
-        /// <summary>
-        /// Доступ к элементам матрицы.
-        /// </summary>
         public double this[int i, int j]
         {
-            get { return _arr[i, j]; }
-            set { _arr[i, j] = value; }
+            get => _arr[i, j];
+            set => _arr[i, j] = value;
         }
     }
 }

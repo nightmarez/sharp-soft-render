@@ -2,12 +2,8 @@
 
 namespace Renderer
 {
-    /// <summary>
-    /// Вектор (координаты точки в 3D).
-    /// </summary>
     public struct Vector
     {
-        // Координаты.
         public double X, Y, Z;
 
         public Vector(double x, double y, double z)
@@ -17,9 +13,6 @@ namespace Renderer
             Z = z;
         }
 
-        /// <summary>
-        /// Умножает вектор на матрицу.
-        /// </summary>
         public Vector Mult(Matrix matrix)
         {
             double x =
@@ -49,17 +42,11 @@ namespace Renderer
             return new Vector(x / w, y / w, z / w);
         }
 
-        /// <summary>
-        /// Умножает вектор на матрицу.
-        /// </summary>
         public static Vector operator *(Vector vec, Matrix matrix)
         {
             return vec.Mult(matrix);
         }
 
-        /// <summary>
-        /// Нормализация вектора
-        /// </summary>
         public Vector Normalize()
         {
             double len = Math.Sqrt(

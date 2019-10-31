@@ -4,9 +4,6 @@ using System.IO;
 
 namespace Renderer
 {
-    /// <summary>
-    /// Загрузчик формата DXF.
-    /// </summary>
     public sealed class DxfLoader: ILoader
     {
         public bool CanLoad(string ext)
@@ -21,7 +18,6 @@ namespace Renderer
             string[] lines = File.ReadAllLines(fileName);
             var currentSection = Sections.None;
             var entityType = Entities.None;
-            string entityId;
 
             int primitiveType = 0;
             int coordsCount = 0;
@@ -107,11 +103,9 @@ namespace Renderer
 
                                 int j = i + 2;
                                 code = int.Parse(lines[j]);
-                                value = lines[j + 1].ToLowerInvariant();
 
                                 if (code == 5)
                                 {
-                                    entityId = value;
                                     i += 2;
                                 }
                             }

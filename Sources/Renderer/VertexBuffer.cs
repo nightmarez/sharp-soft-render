@@ -4,14 +4,8 @@ using System.Drawing;
 
 namespace Renderer
 {
-    /// <summary>
-    /// Буфер вершин.
-    /// </summary>
     public sealed class VertexBuffer
     {
-        /// <summary>
-        /// Список вершин.
-        /// </summary>
         private List<Vertex> _vertices;
 
         public VertexBuffer()
@@ -24,30 +18,23 @@ namespace Renderer
             _vertices = new List<Vertex>(capacity);
         }
 
-        /// <summary>
-        /// Добавляет вершину.
-        /// </summary>
         public void Add(Vertex vx)
         {
             _vertices.Add(vx);
         }
 
-        /// <summary>
-        /// Умножает все веришины на матрицу.
-        /// </summary>
         public VertexBuffer Mult(Matrix matrix)
         {
             var vb = new VertexBuffer(_vertices.Count);
 
             foreach (Vertex vx in _vertices)
+            {
                 vb.Add(vx * matrix);
+            }
 
             return vb;
         }
 
-        /// <summary>
-        /// Создаёт копию буфера.
-        /// </summary>
         public VertexBuffer Clone()
         {
             var vb = new VertexBuffer(_vertices.Count);
@@ -55,17 +42,11 @@ namespace Renderer
             return vb;
         }
 
-        /// <summary>
-        /// Умножает все веришины на матрицу.
-        /// </summary>
         public static VertexBuffer operator* (VertexBuffer vb, Matrix matrix)
         {
             return vb.Mult(matrix);
         }
 
-        /// <summary>
-        /// Отрисовывает треугольники, беря по три вершины из буфера.
-        /// </summary>
         public void DrawTriangles(IRenderTarget target, Color color, bool lighting)
         {
             var tmp = new List<Vertex>(3);
@@ -96,9 +77,6 @@ namespace Renderer
             }
         }
 
-        /// <summary>
-        /// Вычисляет нормали к треугольникам, беря по три вершины из буфера.
-        /// </summary>
         public void CalcTrianglesNormals()
         {
             for (int i = 0; i < _vertices.Count - 2; i += 3)
@@ -136,7 +114,9 @@ namespace Renderer
                     );
 
                 if (double.IsNaN(wrki) || double.IsInfinity(wrki) || Math.Abs(wrki) <= double.Epsilon)
+                {
                     normal = new Vector(0, 0, 0);
+                }
 
                 vx0.Normal = normal;
                 vx1.Normal = normal;
@@ -148,9 +128,6 @@ namespace Renderer
             }
         }
 
-        /// <summary>
-        /// Сортирует треугольники по убыванию расстояния до них.
-        /// </summary>
         public void SortByDistance()
         {
             bool repeat = true;
@@ -184,9 +161,6 @@ namespace Renderer
             }
         }
 
-        /// <summary>
-        /// Ширина области, занимаемой всеми вершинами.
-        /// </summary>
         public double Width
         {
             get
@@ -204,9 +178,6 @@ namespace Renderer
             }
         }
 
-        /// <summary>
-        /// Длина области, занимаемой всеми вершинами.
-        /// </summary>
         public double Length
         {
             get
@@ -224,9 +195,6 @@ namespace Renderer
             }
         }
 
-        /// <summary>
-        /// Высота области, занимаемой всеми вершинами.
-        /// </summary>
         public double Height
         {
             get
@@ -244,17 +212,8 @@ namespace Renderer
             }
         }
 
-        /// <summary>
-        /// Объём области, занимаемой всеми вершинами.
-        /// </summary>
-        public Vector Volume
-        {
-            get { return new Vector(Width, Height, Length); }
-        }
+        public Vector Volume => new Vector(Width, Height, Length);
 
-        /// <summary>
-        /// Смещает объект таким образом, чтобы его центр располагался в начале координат.
-        /// </summary>
         public void CenterCoordsToZero()
         {
             var transformedVertices = new List<Vertex>();
@@ -307,7 +266,7 @@ namespace Renderer
 		    float y2y1 = y2 - y1;
 		    float y3y1 = y3 - y1;
 		
-		    float z2z1= z2 - z1;
+		    float z2z1 = z2 - z1;
 		    float z3z1 = z3 - z1;
 		
 		    float x2x1 = x2 - x1;
@@ -320,9 +279,6 @@ namespace Renderer
             return (x, y) => z1 + ((x - x1) * ac + (y - y1) * bd) / e;
 	    }
 	
-        /// <summary>
-        /// Рисует залитый треугольник горизонтальными линиями.
-        /// </summary>
 	    private void DrawTriangle(
             IRenderTarget renderTarget,
 		    int ax, int ay, int az,
@@ -364,38 +320,52 @@ namespace Renderer
 		    {
 			    var x1 = (int)(ax + (y - ay) * cxaxcyay);
 			    int x2;
-			
-			    if (y < by)
-				    x2 = (int)(ax + (y - ay) * bxaxbyay);
+
+                if (y < by)
+                {
+                    x2 = (int)(ax + (y - ay) * bxaxbyay);
+                }
 			    else
 			    {
-				    if (cy == by)
-					    x2 = bx;
-				    else
-					    x2 = (int)(bx + (y - by) * cxbxcyby);
+                    if (cy == by)
+                    {
+                        x2 = bx;
+                    }
+                    else
+                    {
+                        x2 = (int)(bx + (y - by) * cxbxcyby);
+                    }
 			    }
-			
-			    if (x1 > x2)
+
+                if (x1 > x2)
+                {
                     Utils.Exchange(ref x1, ref x2);
+                }
 
                 DrawHorizontalLine(renderTarget, y, x1, x2, color, plan);
 		    }
 	    }
 
-        /// <summary>
-        /// Рисует горизонтальную линию.
-        /// </summary>
         private void DrawHorizontalLine(IRenderTarget renderTarget, int y, int x1, int x2, Color color, Func<float, float, float> plan)
 	    {
             if (y >= 0 && y < renderTarget.Height)
 		    {
-			    if (x1 > x2)
+                if (x1 > x2)
+                {
                     Utils.Exchange(ref x1, ref x2);
+                }
 
                 if (x2 >= 0 && x1 < renderTarget.Width)
 			    {
-				    if (x1 < 0) x1 = 0;
-                    if (x2 >= renderTarget.Width) x2 = renderTarget.Width - 1;
+                    if (x1 < 0)
+                    {
+                        x1 = 0;
+                    }
+
+                    if (x2 >= renderTarget.Width)
+                    {
+                        x2 = renderTarget.Width - 1;
+                    }
 				
 				    if (x1 <= x2)
 				    {

@@ -6,19 +6,10 @@ using System.Reflection;
 
 namespace Renderer
 {
-    /// <summary>
-    /// Фабрика загрузчиков 3D моделей.
-    /// </summary>
     public sealed class LoadersFactory
     {
-        /// <summary>
-        /// Кэш загрузчиков.
-        /// </summary>
         private readonly Dictionary<string, ILoader> _loaders = new Dictionary<string, ILoader>();
 
-        /// <summary>
-        /// Возвращает загрузчик для заданного файла.
-        /// </summary>
         public ILoader GetLoader(string fileName)
         {
             string ext = (Path.GetExtension(fileName) ?? string.Empty).ToLowerInvariant();
